@@ -5,6 +5,6 @@ const store = configureStore({
   reducer: {
     auth: authReducer,
   },
-  devTools: process.env.NODE_ENV !== "production",
+  devTools: process.env.NODE_ENV !== "production",//! production ortamında devtools eklentisini çalıştırma diyoruz.
 });
 export default store;
