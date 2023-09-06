@@ -1,5 +1,16 @@
-const Brands = () => {
-  return <div>Brands</div>
-}
+import { useEffect } from "react";
+import useStockCall from "../hooks/useStockCall";
 
-export default Brands
+const Brands = () => {
+  // const { getBrands } = useStockCall();
+  const {  getStockData } = useStockCall();
+
+
+  useEffect(() => {
+    // getBrands();
+    getStockData('brands')
+  }, []);
+  return <div>Brands</div>;
+};
+
+export default Brands;
