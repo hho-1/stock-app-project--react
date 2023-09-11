@@ -3,10 +3,13 @@ import { useDispatch, useSelector } from "react-redux";
 import { fetchFail, fetchStart, getSuccess } from "../features/stockSlice";
 import axios from "axios";
 import { toastErrorNotify, toastSuccessNotify } from "../helper/ToastNotify";
+import useAxios from "./useAxios";
 
 const useStockCall = () => {
   const dispatch = useDispatch();
   const { token } = useSelector(state => state.auth);
+
+  const { axiosWithToken } = useAxios();
 
   const BASE_URL = process.env.REACT_APP_BASE_URL;
 
@@ -47,11 +50,12 @@ const useStockCall = () => {
   const getStockData = async url => {
     dispatch(fetchStart());
     try {
-      const { data } = await axios(`${BASE_URL}stock/${url}/`, {
-        headers: {
-          Authorization: `Token ${token}`,
-        },
-      });
+      // const { data } = await axios(`${BASE_URL}stock/${url}/`, {
+      //   headers: {
+      //     Authorization: `Token ${token}`,
+      //   },
+      // });
+      const { data } = await axiosWithToken(`stock/${url}/`);
       console.log(data);
       // dispatch(getSuccess({data, url:"firms"}))
       dispatch(getSuccess({ data, url })); // {data:data,url:url}
@@ -59,16 +63,16 @@ const useStockCall = () => {
       dispatch(fetchFail());
     }
   };
-
-  const deleteStockData = async (url,id) => {
+  //! istek atarken ortak olan base_url  ve token gibi değerleri her seferinde yazmak yerine axios instance kullanarak bunları orada tanımlıyoruz. Ve sonrasında sadece istek atmak istediğimiz end pointi yazmamız yeterli oluyor.
+  const deleteStockData = async (url, id) => {
     dispatch(fetchStart());
     try {
-      await axios.delete(`${BASE_URL}stock/${url}/${id}/`, {
-        headers: {
-          Authorization: `Token ${token}`,
-        },
-      });
-     
+      // await axios.delete(`${BASE_URL}stock/${url}/${id}/`, {
+      //   headers: {
+      //     Authorization: `Token ${token}`,
+      //   },
+      // });
+      await axiosWithToken.delete(`stock/${url}/${id}/`);
       getStockData(url);
       toastSuccessNotify(`${url} successfuly deleted!`);
     } catch (error) {
@@ -77,11 +81,39 @@ const useStockCall = () => {
     }
   };
 
+  const postStockData = async (url,info) => {
+    dispatch(fetchStart());
+    try {
+      const {data} = await axiosWithToken.post(`stock/${url}/`,info);
+
+      getStockData(url);
+      toastSuccessNotify(`${url} successfuly created!`);
+    } catch (error) {
+      dispatch(fetchFail());
+      toastErrorNotify(`${url} not successfuly created!`);
+    }
+  };
+
+  const putStockData = async (url, info) => {
+    dispatch(fetchStart());
+    try {
+      await axiosWithToken.put(`stock/${url}/${info.id}/`, info);
+
+      getStockData(url);
+      toastSuccessNotify(`${url} successfuly updated!`);
+    } catch (error) {
+      dispatch(fetchFail());
+      toastErrorNotify(`${url} not successfuly updated!`);
+    }
+  };
+
   return {
     // getFirms,
     //  getBrands,
     getStockData,
     deleteStockData,
+    postStockData,
+    putStockData,
   };
 };
 
